@@ -124,14 +124,7 @@ abstract contract ERC4671 is
         uint256 tokenId
     ) public view virtual override returns (string memory) {
         _getTokenOrRevert(tokenId);
-        bytes memory baseURI = bytes(_baseURI());
-        if (baseURI.length > 0) {
-            return
-                string(
-                    abi.encodePacked(baseURI, Strings.toHexString(tokenId, 32))
-                );
-        }
-        return "";
+        return _tokenUris[tokenId];
     }
 
     /// @return emittedCount Number of tokens emitted
