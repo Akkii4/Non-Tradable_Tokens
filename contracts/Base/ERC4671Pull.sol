@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "./ERC4671.sol";
-import "./interfaces/IERC4671Pull.sol";
+import "../interfaces/IERC4671Pull.sol";
 
 abstract contract ERC4671Pull is ERC4671, IERC4671Pull {
     using ECDSA for bytes32;

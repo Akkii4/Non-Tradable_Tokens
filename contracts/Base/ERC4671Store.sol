@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import "./interfaces/IERC4671Store.sol";
+import "../interfaces/IERC4671Store.sol";
 
 contract ERC4671Store is IERC4671Store, ERC165 {
     // Mapping from owner to IERC4671Enumerable contracts

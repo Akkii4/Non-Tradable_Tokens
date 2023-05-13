@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import "./ERC4671.sol";
-import "./interfaces/IERC4671Consensus.sol";
+import "../interfaces/IERC4671Consensus.sol";
 
 contract ERC4671Consensus is ERC4671, IERC4671Consensus {
     // Consensus voters addresses

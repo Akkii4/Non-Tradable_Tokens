@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import "./ERC4671.sol";
-import "./interfaces/IERC4671Delegate.sol";
+import "../interfaces/IERC4671Delegate.sol";
 
 abstract contract ERC4671Delegate is ERC4671, IERC4671Delegate {
     // Mapping from operator to list of owners

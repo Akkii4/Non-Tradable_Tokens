@@ -5,9 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import "./interfaces/IERC4671.sol";
-import "./interfaces/IERC4671Metadata.sol";
-import "./interfaces/IERC4671Enumerable.sol";
+import "../interfaces/IERC4671.sol";
+import "../interfaces/IERC4671Metadata.sol";
+import "../interfaces/IERC4671Enumerable.sol";
 
 abstract contract ERC4671 is
     IERC4671,
