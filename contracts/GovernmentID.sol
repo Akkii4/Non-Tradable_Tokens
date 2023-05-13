@@ -19,7 +19,7 @@ contract GovernmentID is ERC4671, Ownable {
     event Whitelisted(address indexed _citizen);
 
     modifier zeroAddressCheck(address _addr) {
-        require(_addr != address(0), "Zero address");
+        require(_addr != address(0), "Invalid address");
         _;
     }
 
@@ -33,7 +33,7 @@ contract GovernmentID is ERC4671, Ownable {
         emit TokenMinted(_citizen, citizenUID[_citizen]);
     }
 
-    function revokeGovernmentID(address _citizen) public onlyOwner {
+    function revokeCitizenGovernmentID(address _citizen) public onlyOwner {
         uint256 tokenId = citizenUID[_citizen];
         _revoke(tokenId);
         delete citizenUID[_citizen];
