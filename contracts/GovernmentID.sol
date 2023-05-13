@@ -37,21 +37,22 @@ contract GovernmentID is ERC4671, Ownable {
     function issueGovernmentID(
         address _citizen,
         string memory _tokenUri
-    ) public {
+    ) public onlyOwner {
         citizenUID[_citizen] = emittedCount();
         _mint(_citizen);
         setTokenURI(citizenUID[_citizen], _tokenUri);
         emit TokenMinted(_citizen, citizenUID[_citizen]);
     }
 
-    function revokeGovernmentID(address _citizen) public {
+    function revokeGovernmentID(address _citizen) public onlyOwner {
         uint256 tokenId = citizenUID[_citizen];
         _revoke(tokenId);
         delete citizenUID[_citizen];
     }
 
-    function blacklist(address _citizen) public {
-        require(_citizen != address(0), "Cannot blacklist zero address");
+    function blacklistCitizen(
+        address _citizen
+    ) public onlyOwner zeroAddressCheck(_citizen) {
         isBlacklisted[_citizen] = true;
         if (hasValid(_citizen)) {
             uint256[] memory tokens = tokensOfOwner(_citizen);
@@ -65,17 +66,21 @@ contract GovernmentID is ERC4671, Ownable {
         emit Blacklisted(_citizen);
     }
 
-    function whitelist(address _citizen) public zeroAddressCheck(_citizen) {
+    function whitelistCitizen(
+        address _citizen
+    ) public onlyOwner zeroAddressCheck(_citizen) {
         isBlacklisted[_citizen] = false;
         emit Whitelisted(_citizen);
     }
 
-    function addVerifier(address _verifier) public zeroAddressCheck(_verifier) {
+    function addVerifier(
+        address _verifier
+    ) public onlyOwner zeroAddressCheck(_verifier) {
         isVerifier[_verifier] = true;
         emit VerifierAdded(_verifier);
     }
 
-    function removeVerifier(address _verifier) public {
+    function removeVerifier(address _verifier) public onlyOwner {
         isVerifier[_verifier] = false;
         emit VerifierRemoved(_verifier);
     }
@@ -113,10 +118,7 @@ contract GovernmentID is ERC4671, Ownable {
     function hasValid(
         address owner
     ) public view override(ERC4671) returns (bool) {
-        require(
-            isVerifier[msg.sender] || msg.sender == owner,
-            "Unauthorized access"
-        );
+        require(isVerifier[msg.sender], "Unauthorized access");
         return super.hasValid(owner);
     }
 
