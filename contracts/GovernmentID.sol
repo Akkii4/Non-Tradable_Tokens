@@ -14,14 +14,8 @@ contract GovernmentID is ERC4671, Ownable {
     mapping(address => uint256) public citizenUID;
     mapping(address => bool) public isBlacklisted;
 
-    event TokenMinted(address indexed _owner, uint256 indexed _tokenId);
+    event IDissued(address indexed _owner, uint256 indexed _tokenId);
     event Blacklisted(address indexed _citizen);
-    event Whitelisted(address indexed _citizen);
-
-    modifier zeroAddressCheck(address _addr) {
-        require(_addr != address(0), "Invalid address");
-        _;
-    }
 
     function issueGovernmentID(
         address _citizen,
@@ -30,18 +24,10 @@ contract GovernmentID is ERC4671, Ownable {
         citizenUID[_citizen] = emittedCount();
         _mint(_citizen);
         setTokenURI(citizenUID[_citizen], _tokenUri);
-        emit TokenMinted(_citizen, citizenUID[_citizen]);
+        emit IDissued(_citizen, citizenUID[_citizen]);
     }
 
-    function revokeCitizenGovernmentID(address _citizen) public onlyOwner {
-        uint256 tokenId = citizenUID[_citizen];
-        _revoke(tokenId);
-        delete citizenUID[_citizen];
-    }
-
-    function blacklistCitizen(
-        address _citizen
-    ) public onlyOwner zeroAddressCheck(_citizen) {
+    function blacklistCitizen(address _citizen) public onlyOwner {
         isBlacklisted[_citizen] = true;
         if (hasValid(_citizen)) {
             uint256[] memory tokens = tokensOfOwner(_citizen);
@@ -53,12 +39,5 @@ contract GovernmentID is ERC4671, Ownable {
             }
         }
         emit Blacklisted(_citizen);
-    }
-
-    function whitelistCitizen(
-        address _citizen
-    ) public onlyOwner zeroAddressCheck(_citizen) {
-        isBlacklisted[_citizen] = false;
-        emit Whitelisted(_citizen);
     }
 }
