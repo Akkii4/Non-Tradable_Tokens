@@ -25,16 +25,25 @@ describe("GovernmentID", function () {
     expect(await governmentID.hasValid(citizen1.address)).to.be.true;
   });
 
-  it("should revoke a government ID", async function () {
+  it("should blacklist a citizen", async function () {
     const tokenUri = "https://example.com/token";
+
     await governmentID.issueGovernmentID(citizen1.address, tokenUri);
-    const tokenId = await governmentID.citizenUID(citizen1.address);
-    await governmentID.revokeCitizenGovernmentID(citizen1.address);
-    expect(await governmentID.isValid(tokenId)).to.be.false;
-    expect(await governmentID.hasValid(citizen1.address)).to.be.false;
+    await governmentID.issueGovernmentID(citizen2.address, tokenUri);
+
+    await governmentID.blacklistCitizen(citizen1.address);
+
+    const isBlacklisted1 = await governmentID.isBlacklisted(citizen1.address);
+    const isBlacklisted2 = await governmentID.isBlacklisted(citizen2.address);
+    expect(isBlacklisted1).to.be.true;
+    expect(isBlacklisted2).to.be.false;
+
+    const tokens = await governmentID.tokensOfOwner(citizen1.address);
+    const isRevoked = await governmentID.isValid(tokens[0]);
+    expect(isRevoked).to.be.false;
   });
 
-  it("should return all tokens owned by an address", async function () {
+  it("should return all ids owned by an citizen", async function () {
     const tokenUris = [
       "https://example.com/token1",
       "https://example.com/token2",
@@ -47,7 +56,7 @@ describe("GovernmentID", function () {
     expect(await governmentID.tokenURI(tokens[1])).to.equal(tokenUris[1]);
   });
 
-  it("should return the total number of tokens issued", async function () {
+  it("should return the total number of ids issued", async function () {
     const tokenUris = [
       "https://example.com/token1",
       "https://example.com/token2",
@@ -57,7 +66,7 @@ describe("GovernmentID", function () {
     expect(await governmentID.emittedCount()).to.equal(2);
   });
 
-  it("should return the total number of token holders", async function () {
+  it("should return the total number of ids holders", async function () {
     const tokenUris = [
       "https://example.com/token1",
       "https://example.com/token2",
