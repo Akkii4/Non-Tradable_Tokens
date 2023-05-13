@@ -11,7 +11,9 @@ contract GovernmentID is ERC4671, Ownable {
     constructor(
         string memory _idType,
         string memory _idName
-    ) ERC4671(_idName, _idType) {}
+    ) ERC4671(_idName, _idType) {
+        isVerifier[owner()] = true;
+    }
 
     mapping(address => uint256) public citizenUID;
     mapping(address => bool) public isBlacklisted;
