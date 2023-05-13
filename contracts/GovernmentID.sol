@@ -6,14 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Base/ERC4671.sol";
 
 contract GovernmentID is ERC4671, Ownable {
-    mapping(address => bool) public isVerifier;
-
     constructor(
         string memory _idType,
         string memory _idName
-    ) ERC4671(_idName, _idType) {
-        isVerifier[owner()] = true;
-    }
+    ) ERC4671(_idName, _idType) {}
 
     mapping(address => uint256) public citizenUID;
     mapping(address => bool) public isBlacklisted;
@@ -21,13 +17,6 @@ contract GovernmentID is ERC4671, Ownable {
     event TokenMinted(address indexed _owner, uint256 indexed _tokenId);
     event Blacklisted(address indexed _citizen);
     event Whitelisted(address indexed _citizen);
-    event VerifierAdded(address indexed _verifier);
-    event VerifierRemoved(address indexed _verifier);
-
-    modifier onlyVerifier() {
-        require(isVerifier[msg.sender], "Caller is not a verifier");
-        _;
-    }
 
     modifier zeroAddressCheck(address _addr) {
         require(_addr != address(0), "Zero address");
@@ -71,68 +60,5 @@ contract GovernmentID is ERC4671, Ownable {
     ) public onlyOwner zeroAddressCheck(_citizen) {
         isBlacklisted[_citizen] = false;
         emit Whitelisted(_citizen);
-    }
-
-    function addVerifier(
-        address _verifier
-    ) public onlyOwner zeroAddressCheck(_verifier) {
-        isVerifier[_verifier] = true;
-        emit VerifierAdded(_verifier);
-    }
-
-    function removeVerifier(address _verifier) public onlyOwner {
-        isVerifier[_verifier] = false;
-        emit VerifierRemoved(_verifier);
-    }
-
-    function ownerOf(
-        uint256 tokenId
-    ) public view override(ERC4671) returns (address) {
-        require(
-            isVerifier[msg.sender] || _isTokenOwner(tokenId),
-            "Unauthorized access"
-        );
-        return super.ownerOf(tokenId);
-    }
-
-    function balanceOf(
-        address owner
-    ) public view override(ERC4671) returns (uint256) {
-        require(
-            isVerifier[msg.sender] || msg.sender == owner,
-            "Unauthorized access"
-        );
-        return super.balanceOf(owner);
-    }
-
-    function tokensOfOwner(
-        address owner
-    ) public view override(ERC4671) returns (uint256[] memory) {
-        require(
-            isVerifier[msg.sender] || msg.sender == owner,
-            "Unauthorized access"
-        );
-        return super.tokensOfOwner(owner);
-    }
-
-    function hasValid(
-        address owner
-    ) public view override(ERC4671) returns (bool) {
-        require(isVerifier[msg.sender], "Unauthorized access");
-        return super.hasValid(owner);
-    }
-
-    function isValid(
-        uint256 tokenId
-    ) public view override(ERC4671) returns (bool) {
-        require(
-            isVerifier[msg.sender] || _isTokenOwner(tokenId),
-            "Unauthorized access"
-        );
-        return super.isValid(tokenId);
-    }
-
-    function _isTokenOwner(uint256 tokenId) internal view returns (bool) {
-        return ownerOf(tokenId) == msg.sender;
     }
 }
