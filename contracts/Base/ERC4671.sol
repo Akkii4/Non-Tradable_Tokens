@@ -111,9 +111,7 @@ abstract contract ERC4671 is
         uint256 tokenId,
         string memory tokenUri
     ) public virtual {
-        require(_isCreator(),
-            "Only the creator can set the token URI"
-        );
+        require(_isCreator(), "Only the creator can set the token URI");
         _tokenUris[tokenId] = tokenUri;
     }
 
@@ -217,7 +215,7 @@ abstract contract ERC4671 is
     }
 
     /// @return True if the caller is the contract's creator, false otherwise
-    function _isCreator()() internal view virtual returns (bool) {
+    function _isCreator() internal view virtual returns (bool) {
         return msg.sender == _creator;
     }
 
