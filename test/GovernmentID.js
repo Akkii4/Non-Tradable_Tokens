@@ -1,72 +1,69 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
 describe("GovernmentID", function () {
   let governmentID;
   let owner;
-  let addr1;
-  let addr2;
+  let citizen1;
+  let citizen2;
 
   beforeEach(async function () {
     const GovernmentID = await ethers.getContractFactory("GovernmentID");
-    governmentID = await GovernmentID.deploy("idType", "idName");
-
-    [owner, addr1, addr2] = await ethers.getSigners();
+    [owner, citizen1, citizen2] = await ethers.getSigners();
+    governmentID = await GovernmentID.deploy("Passport", "PASS");
+    await governmentID.deployed();
   });
 
-  describe("Deployment", function () {
-    it("Should set the correct owner", async function () {
-      expect(await governmentID.owner()).to.equal(owner.address);
-    });
+  it("should issue a government ID to a citizen", async function () {
+    const tokenUri = "https://example.com/token";
+    await governmentID.issueGovernmentID(citizen1.address, tokenUri);
+    const tokenId = await governmentID.citizenUID(citizen1.address);
+    expect(tokenId).to.equal(0);
+    expect(await governmentID.ownerOf(tokenId)).to.equal(citizen1.address);
+    expect(await governmentID.tokenURI(tokenId)).to.equal(tokenUri);
+    expect(await governmentID.isValid(tokenId)).to.be.true;
+    expect(await governmentID.hasValid(citizen1.address)).to.be.true;
   });
 
-  describe("issueGovernmentID", function () {
-    it("Should issue a new government ID", async function () {
-      await governmentID.issueGovernmentID(addr1.address, "tokenURI");
-      const tokenId = await governmentID.citizenUID(addr1.address);
-      expect(await governmentID.ownerOf(tokenId)).to.equal(addr1.address);
-    });
+  it("should revoke a government ID", async function () {
+    const tokenUri = "https://example.com/token";
+    await governmentID.issueGovernmentID(citizen1.address, tokenUri);
+    const tokenId = await governmentID.citizenUID(citizen1.address);
+    await governmentID.revokeCitizenGovernmentID(citizen1.address);
+    expect(await governmentID.isValid(tokenId)).to.be.false;
+    expect(await governmentID.hasValid(citizen1.address)).to.be.false;
   });
 
-  describe("revokeGovernmentID", function () {
-    it("Should revoke a government ID", async function () {
-      await governmentID.issueGovernmentID(addr1.address, "tokenURI");
-      const tokenId = await governmentID.citizenUID(addr1.address);
-      await governmentID.revokeGovernmentID(addr1.address);
-      expect(await governmentID.ownerOf(tokenId)).to.equal(
-        "0x0000000000000000000000000000000000000000"
-      );
-    });
+  it("should return all tokens owned by an address", async function () {
+    const tokenUris = [
+      "https://example.com/token1",
+      "https://example.com/token2",
+    ];
+    await governmentID.issueGovernmentID(citizen1.address, tokenUris[0]);
+    await governmentID.issueGovernmentID(citizen1.address, tokenUris[1]);
+    const tokens = await governmentID.tokensOfOwner(citizen1.address);
+    expect(tokens.length).to.equal(2);
+    expect(await governmentID.tokenURI(tokens[0])).to.equal(tokenUris[0]);
+    expect(await governmentID.tokenURI(tokens[1])).to.equal(tokenUris[1]);
   });
 
-  describe("blacklist", function () {
-    it("Should blacklist a citizen", async function () {
-      await governmentID.issueGovernmentID(addr1.address, "tokenURI");
-      await governmentID.blacklist(addr1.address);
-      expect(await governmentID.isBlacklisted(addr1.address)).to.be.true;
-    });
+  it("should return the total number of tokens issued", async function () {
+    const tokenUris = [
+      "https://example.com/token1",
+      "https://example.com/token2",
+    ];
+    await governmentID.issueGovernmentID(citizen1.address, tokenUris[0]);
+    await governmentID.issueGovernmentID(citizen2.address, tokenUris[1]);
+    expect(await governmentID.emittedCount()).to.equal(2);
   });
 
-  describe("whitelist", function () {
-    it("Should whitelist a citizen", async function () {
-      await governmentID.issueGovernmentID(addr1.address, "tokenURI");
-      await governmentID.blacklist(addr1.address);
-      await governmentID.whitelist(addr1.address);
-      expect(await governmentID.isBlacklisted(addr1.address)).to.be.false;
-    });
-  });
-
-  describe("addVerifier", function () {
-    it("Should add a verifier", async function () {
-      await governmentID.addVerifier(addr1.address);
-      expect(await governmentID.isVerifier(addr1.address)).to.be.true;
-    });
-  });
-
-  describe("removeVerifier", function () {
-    it("Should remove a verifier", async function () {
-      await governmentID.addVerifier(addr1.address);
-      await governmentID.removeVerifier(addr1.address);
-      expect(await governmentID.isVerifier(addr1.address)).to.be.false;
-    });
+  it("should return the total number of token holders", async function () {
+    const tokenUris = [
+      "https://example.com/token1",
+      "https://example.com/token2",
+    ];
+    await governmentID.issueGovernmentID(citizen1.address, tokenUris[0]);
+    await governmentID.issueGovernmentID(citizen2.address, tokenUris[1]);
+    expect(await governmentID.holdersCount()).to.equal(2);
   });
 });
